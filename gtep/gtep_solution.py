@@ -8,6 +8,7 @@ from pyomo.environ import *
 from pyomo.environ import units as u
 from gtep.gtep_model import ExpansionPlanningModel
 import logging
+import os
 
 import json
 from pathlib import Path
@@ -846,6 +847,28 @@ class ExpansionPlanningSolution:
                     plot_bounds=plot_bounds,
                 )
 
+    def _check_save_loc(self, filepath):
+        """
+        Check if the given filepath is a valid directory.
+        If it is not valid, create the directory.
+
+        Parameters:
+        filepath (str): The path to the folder to check/create.
+
+        Returns:
+        str: The absolute path of the directory.
+        """
+        # Check if the directory exists
+        if not os.path.exists(filepath):
+            # If it doesn't exist, create the directory
+            os.makedirs(filepath)
+            print(f"Directory created: {filepath}")
+        else:
+            print(f"Directory already exists: {filepath}")
+
+        # Return the absolute path of the directory
+        return os.path.abspath(filepath)
+    
     # JSC update - 'dc_branch' to 'branch'
     def _plot_graph_workhorse(
         self,
@@ -1216,8 +1239,8 @@ class ExpansionPlanningSolution:
         pass
 
     def plot_levels(self, save_dir="."):
-
-        # self._plot_graph_workhorse()
+        
+        self._check_save_loc(save_dir)
 
         # plot or represent primals trees
         for this_root_level_key in self.primals_tree:
@@ -1269,38 +1292,3 @@ class ExpansionPlanningSolution:
                                     parent_key_string,
                                     save_dir,
                                 )
-
-        # # plot or represent expressions
-        # self._expressions_plot_workhorse(
-        #     "investmentStage", self.expressions_tree, 'investmentStage', save_dir
-        # )
-        # for this_root_level_key in self.expressions_tree:
-        #     if "investmentStage" in this_root_level_key:
-        #         investment_level_cut = self.expressions_tree[this_root_level_key]
-        #         parent_key_string = f"{this_root_level_key}"
-        #         self._expressions_plot_workhorse(
-        #             "representativePeriod", investment_level_cut, parent_key_string, save_dir
-        #         )
-
-        #         for this_inv_level_key in self.expressions_tree[this_root_level_key].keys():
-        #             if "representativePeriod" in this_inv_level_key:
-        #                 representative_level_cut = self.expressions_tree[this_root_level_key][this_inv_level_key]
-        #                 parent_key_string = f"{this_root_level_key}_{this_inv_level_key}"
-        #                 self._expressions_plot_workhorse(
-        #                     "commitmentPeriod", representative_level_cut, parent_key_string, save_dir
-        #                 )
-
-        #                 for this_rep_level_key in self.expressions_tree[
-        #                     this_root_level_key
-        #                 ][this_inv_level_key].keys():
-        #                     if "commitmentPeriod" in this_rep_level_key:
-        #                         commitment_level_cut = self.expressions_tree[
-        #                             this_root_level_key
-        #                         ][this_inv_level_key][this_rep_level_key]
-
-        #                         parent_key_string = f"{this_root_level_key}_{this_inv_level_key}_{this_rep_level_key}"
-
-        #                         self._expressions_plot_workhorse(
-        #                             "dispatchPeriod",commitment_level_cut, parent_key_string, save_dir
-        #                         )
-        # pass
