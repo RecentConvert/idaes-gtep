@@ -42,23 +42,48 @@ TransformationFactory("gdp.bound_pretransformation").apply_to(mod_object.model)
 TransformationFactory("gdp.bigm").apply_to(mod_object.model)
 
 # %%
-opt = Highs()
-mod_object.results = opt.solve(mod_object.model)
+# opt = Highs()
+# mod_object.results = opt.solve(mod_object.model)
 
 # %% [markdown]
 # #TODO -- demonstrate capabilities to save & load solution info
 
 # %%
 sol_object = ExpansionPlanningSolution()
-sol_object.load_from_model(mod_object)
-sol_object.dump_json("./gtep/gtep_solution.json")
+# sol_object.load_from_model(mod_object)
+# sol_object.dump_json("./gtep/gtep_solution.json")
 
 
 # %%
 sol_object.import_data_object(data_object)
-
+sol_object.read_json("./gtep/gtep_solution.json")
 
 # %%
-sol_object.plot_levels(save_dir="./gtep/plots/")
+'''
+plot_selection: if key = True that object will be plotted
+
+plots from toplevel keys:
+'branchChanged':        if branch was disabled, extended, installed, operational, or retired
+'genChanged':           if gen was disabled, extended, installed, operational, or retired
+'renewableGeneration':  if renewable was extended, installed, or operational
+
+plots from midlevel keys:
+'genPowered':           if gen was off, on, shutdown, or startup
+
+plots from bottomlevel keys:
+'powerFlow_graph':      networkx plot of power flow: branchInUse, branchNotInUse
+'powerFlow':            line plot of power flow: branchInUse, branchNotInUse
+'loadShed':             line plot of loadShed
+'thermalGeneration':    line plot of quickstartReserve, spinningReserve, thermalGeneration
+'renewableGeneration':  line plot of renewableCurtailment, renewableGeneration
+'''
+plot_selection = {
+    'toplevel':     False,
+    'midlevel':     False,
+    'bottomlevel':  True,    
+}
+
+sol_object.plot_levels(save_dir="./gtep/plots/",
+                       plot_selection=plot_selection)
 
 

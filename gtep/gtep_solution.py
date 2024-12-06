@@ -9,6 +9,7 @@ from pyomo.environ import units as u
 from gtep.gtep_model import ExpansionPlanningModel
 import logging
 import os
+import pdb
 
 import json
 from pathlib import Path
@@ -1238,7 +1239,7 @@ class ExpansionPlanningSolution:
         )
         pass
 
-    def plot_levels(self, save_dir="."):
+    def plot_levels(self, save_dir=".", plot_selection={}):
         
         self._check_save_loc(save_dir)
 
@@ -1247,21 +1248,25 @@ class ExpansionPlanningSolution:
             if "investmentStage" in this_root_level_key:
                 # run the toplevel keys
                 parent_key_string = f"{this_root_level_key}"
-                self._level_plot_workhorse(
-                    "investmentStage", self.primals_tree, this_root_level_key, save_dir
-                )
+                
+                if plot_selection['toplevel'] == True:
+                    self._level_plot_workhorse(
+                        "investmentStage", self.primals_tree, this_root_level_key, save_dir
+                    )
 
                 # run the representative period subkeys
                 investment_level_cut = self.primals_tree[this_root_level_key]
                 parent_key_string = f"{this_root_level_key}"
-                self._level_plot_workhorse(
-                    "representativePeriod",
-                    investment_level_cut,
-                    parent_key_string,
-                    save_dir,
-                )
+                if plot_selection['toplevel'] == True:
+                    self._level_plot_workhorse(
+                        "representativePeriod",
+                        investment_level_cut,
+                        parent_key_string,
+                        save_dir,
+                    )
 
                 for this_inv_level_key in self.primals_tree[this_root_level_key].keys():
+                    # run the midlevel keys
                     if "representativePeriod" in this_inv_level_key:
                         representative_level_cut = self.primals_tree[
                             this_root_level_key
@@ -1269,12 +1274,13 @@ class ExpansionPlanningSolution:
                         parent_key_string = (
                             f"{this_root_level_key}_{this_inv_level_key}"
                         )
-                        self._level_plot_workhorse(
-                            "commitmentPeriod",
-                            representative_level_cut,
-                            parent_key_string,
-                            save_dir,
-                        )
+                        if plot_selection['midlevel'] == True:
+                            self._level_plot_workhorse(
+                                "commitmentPeriod",
+                                representative_level_cut,
+                                parent_key_string,
+                                save_dir,
+                            )
 
                         for this_rep_level_key in self.primals_tree[
                             this_root_level_key
@@ -1286,9 +1292,10 @@ class ExpansionPlanningSolution:
 
                                 parent_key_string = f"{this_root_level_key}_{this_inv_level_key}_{this_rep_level_key}"
 
-                                self._level_plot_workhorse(
-                                    "dispatchPeriod",
-                                    commitment_level_cut,
-                                    parent_key_string,
-                                    save_dir,
-                                )
+                                if plot_selection['bottomlevel'] == True:
+                                    self._level_plot_workhorse(
+                                        "dispatchPeriod",
+                                        commitment_level_cut,
+                                        parent_key_string,
+                                        save_dir,
+                                    )
